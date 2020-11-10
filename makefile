@@ -4,10 +4,10 @@ run:
 	go run main.go
 
 migrate-up:
-	 migrate -database "postgres://fajarfathirwan@localhost:5432/pos?sslmode=disable" -source "file:///Users/fajarfathirwan/Project/go-docker/migrations" up
+	 migrate -database "postgres://fajarfathirwan@localhost:5432/pos?sslmode=disable" -source "file:///Users/fajarfathirwan/Project/go-docker/migration" up
 
 migrate-down:
-	 migrate -database "postgres://fajarfathirwan@localhost:5432/pos?sslmode=disable" -source "file:///Users/fajarfathirwan/Project/go-docker/migrations" up
+	 migrate -database "postgres://fajarfathirwan@localhost:5432/pos?sslmode=disable" -source "file:///Users/fajarfathirwan/Project/go-docker/migration" down
 
 dep:
 	go mod download
