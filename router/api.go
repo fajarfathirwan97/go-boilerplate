@@ -22,6 +22,7 @@ func API(r *mux.Router) *mux.Router {
 	// /api/v1/auth/
 	v1Auth := v1.PathPrefix("/auth").Subrouter()
 	v1Auth.Methods("POST").Path("/sign-up").HandlerFunc(auth.SignUpHandler).Name("v1.auth.sign-up")
+	v1Auth.Methods("POST").Path("/sign-in").HandlerFunc(auth.SignInHandler).Name("v1.auth.sign-in")
 	return r
 }
 

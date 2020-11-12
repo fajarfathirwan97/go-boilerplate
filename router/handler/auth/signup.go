@@ -24,6 +24,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	user := &model.User{
 		Uuid:      uuidVal.String(),
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	helper.MapToStruct(req, &user)
 
@@ -42,6 +43,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Uuid:      uuidValMerchant.String(),
 		UserUuid:  user.Uuid,
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	helper.MapToStruct(req, &merchant)
 
