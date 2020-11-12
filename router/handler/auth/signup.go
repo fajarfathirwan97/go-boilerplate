@@ -13,12 +13,6 @@ import (
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	req := helper.ParseJsonBody(r.Body).(map[string]interface{})
 
-	db, err := helper.GetDBClient()
-	if err != nil {
-		helper.ErrorHandler(err, w)
-		return
-	}
-	defer db.Close()
 	uuidVal, _ := uuid.NewUUID()
 
 	user := &model.User{
@@ -28,7 +22,8 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	helper.MapToStruct(req, &user)
 
-	if err = helper.ValidateStruct(user); err != nil {
+	err := helper.ValidateStruct(user)
+	if err != nil {
 		helper.ErrorHandler(err, w)
 		return
 	}
@@ -46,47 +41,6 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: time.Now(),
 	}
 	helper.MapToStruct(req, &merchant)
-
-	tx := db.MustBegin()
-	if _, err = tx.NamedExec(`
-		INSERT INTO users (
-			uuid,
-			email,
-			password,
-			created_at,
-			updated_at
-		) VALUES (
-			:uuid,
-			:email,
-			:password,
-			:created_at,
-			:updated_at
-		)`, user); err != nil {
-		tx.Rollback()
-		helper.ErrorHandler(err, w)
-		return
-	}
-	if _, err = tx.NamedExec(`
-		INSERT INTO merchants (
-			uuid,
-			user_uuid,
-			merchant_name,
-			merchant_address,
-			created_at,
-			updated_at
-		) VALUES (
-			:uuid,
-			:user_uuid,
-			:merchant_name,
-			:merchant_address,
-			:created_at,
-			:updated_at
-		)`,
-		merchant); err != nil {
-		tx.Rollback()
-		helper.ErrorHandler(err, w)
-		return
-	}
-	tx.Commit()
+	user.CreateUser(*merchant)
 	helper.ReturnResponseAsJSON(w, nil, "Success Create User", 200)
 }
