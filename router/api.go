@@ -1,13 +1,12 @@
 package router
 
 import (
-	"fmt"
 	"go-docker/helper"
-	"go-docker/router/handler/auth"
 	"go-docker/router/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 func API(r *mux.Router) *mux.Router {
@@ -17,17 +16,19 @@ func API(r *mux.Router) *mux.Router {
 	v1.MethodNotAllowedHandler = http.HandlerFunc(methodNotAllowedHandler)
 	v1.Use(middleware.ApiAccessMiddleware)
 	// /api/v1/ping/
-	v1.Methods("GET").Path("/ping").HandlerFunc(handlePing)
-
+	registerRoute(v1, ApiRoute["v1"])
 	// /api/v1/auth/
 	v1Auth := v1.PathPrefix("/auth").Subrouter()
-	v1Auth.Methods("POST").Path("/sign-up").HandlerFunc(auth.SignUpHandler).Name("v1.auth.sign-up")
-	v1Auth.Methods("POST").Path("/sign-in").HandlerFunc(auth.SignInHandler).Name("v1.auth.sign-in")
+	registerRoute(v1Auth, ApiRoute["auth"])
 	return r
 }
-
+func registerRoute(r *mux.Router, routes []Route) {
+	for _, route := range routes {
+		r.Methods(route.Method).Path(route.Path).HandlerFunc(route.Handler).Name(route.Name)
+	}
+}
 func handlePing(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(fmt.Sprintf("PONG")))
+	helper.ReturnResponseAsJSON(w, nil, "PONG", 404)
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,4 +39,12 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 func methodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	helper.ReturnResponseAsJSON(w, nil, "Method Not Allowd", 405)
 	return
+}
+
+func FetchAllRoute() {
+	routes := []interface{}{}
+	for _, v := range ApiRoute {
+		routes = append(routes, v)
+	}
+	logrus.Infoln(routes)
 }
